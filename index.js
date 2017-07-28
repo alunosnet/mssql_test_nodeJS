@@ -1,31 +1,46 @@
 "use strict";
 
-let mssql = require("mssql");
+let mssql = require("mssql/msnodesqlv8");
 
 let config={
-    user: "sa",
-    password: "",
-    server: "localhost",
+    server: "madpc",
     database: "test",
+    driver: 'msnodesqlv8',
     options: {
-         instanceName : "MSSQLLocalDB"
+        trustedConnection: true
     }
 };
 
 let connection= mssql.connect(config, err=>{
-    console.log(err);
-    let request =new mssql.Request(connection).query("select 1 as number",(err,result)=>{
-        console.log(result);
-    });
-});
-/*
-async ()=>{
-    try{
-        const pool = await mssql.connect('mssql://sa:@localhost/test');
-        const result=await mssql.query('select nome,morada from alunos');
-        console.log(result);
-    }catch(err){
-        console.log("Error: "+err);
+    if(err){
+        console.log(err);
+        return;
     }
+    /*let request =new mssql.Request(connection).query("select nome,morada from alunos",(err,result)=>{
+        console.dir(result);
+        process.exit();
+    });*/
+    listarTodosRegistos(connection);
+  //  insere(connection,"Nome 1","morada 1");
+  //  listarTodosRegistos(connection);
+});
+
+function insere(connection,nome,morada){
+    let request =new mssql.Request(connection);
+    request.input("nome",mssql.NVarChar,nome);
+    request.input("morada",mssql.NVarChar,morada);
+    request.query("insert into alunos(nome,morada) values (@nome,@morada)",(err,result)=>{
+        if(err){
+            console.log(err);
+            return;
+        }
+        process.exit();
+    });
 }
-*/
+
+function listarTodosRegistos(connection){
+     let request =new mssql.Request(connection).query("select nome,morada from alunos",(err,result)=>{
+        console.dir(result);
+        
+    });
+}
